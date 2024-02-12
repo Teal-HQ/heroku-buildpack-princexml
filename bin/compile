@@ -1,20 +1,51 @@
 #!/bin/bash
 
-PRINCE_VERSION="11.1"
-echo "-----> Installing PrinceXML $PRINCE_VERSION"
-[ -d .downloads ] || mkdir .downloads
-(cd .downloads; [ -d "prince-$PRINCE_VERSION-linux-amd64-static" ] ||
-  curl -s https://www.princexml.com/download/prince-$PRINCE_VERSION-linux-generic-x86_64.tar.gz | tar xzf -)
+indent() {
+  sed -u 's/^/       /'
+}
 
-if [ -f $3/PRINCE_LICENSE ]; then
-  echo "       Configuring license file"
-  cp $3/PRINCE_LICENSE ./.downloads/prince-$PRINCE_VERSION-linux-generic-x86_64/lib/prince/license/license.dat
+arrow() {
+  sed -u 's/^/-----> /'
+}
+
+BUILD_DIR="$1"
+CACHE_DIR="$2"
+ENV_DIR="$3"
+
+PRINCE_VERSION='15.2'
+LINUX_DISTRIBUTION='ubuntu22.04'
+LINUX_ARCH='amd64'
+PRINCE_PACKAGE="prince-$PRINCE_VERSION-$LINUX_DISTRIBUTION-$LINUX_ARCH"
+
+echo "PrinceXML $PRINCE_VERSION" | arrow
+
+echo "Fetching PrinceXML $PRINCE_VERSION" | arrow
+(
+  cd "$CACHE_DIR" || { echo "CACHE_DIR not available"; exit 1; }
+  if [ -d "$PRINCE_PACKAGE" ]; then
+    echo "Found $PRINCE_PACKAGE, skipping download" | arrow
+  else
+    echo "Downloading $PRINCE_PACKAGE" | arrow
+    curl -s "https://www.princexml.com/download/$PRINCE_PACKAGE.tar.gz" | tar xzf - | indent
+  fi
+)
+
+echo "Installing PrinceXML $PRINCE_VERSION" | arrow
+bash "$CACHE_DIR/$PRINCE_PACKAGE/install.sh" "$BUILD_DIR"
+
+echo 'Configuring license' | arrow
+if [ -f "$ENV_DIR/PRINCE_LICENSE" ]; then
+  echo 'Adding license file' | indent
+  cp "$ENV_DIR/PRINCE_LICENSE" "$BUILD_DIR/lib/prince/license/license.dat"
 else
-  echo "       No license found"
+  echo 'No license found' | indent
 fi
 
-echo $1 | ./.downloads/prince-$PRINCE_VERSION-linux-generic-x86_64/install.sh
-cat >$1/bin/prince <<EOF
+echo 'Creating wrapper script' | arrow
+cat >"$BUILD_DIR/bin/prince" <<EOF
 #!/bin/sh
 exec /app/lib/prince/bin/prince --prefix="/app/lib/prince" "\$@"
 EOF
+
+echo "PrinceXML $PRINCE_VERSION installed!" | arrow
+exit 0
