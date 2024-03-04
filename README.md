@@ -1,6 +1,6 @@
 # Heroku Buildpack PrinceXML
 
-A buildpack that installs PrinceXML (version 15.3) on Heroku.
+A buildpack that installs PrinceXML (version `20240222`) on Heroku.
 
 ## Usage
 
@@ -12,7 +12,7 @@ After deploying an application, you can verify `prince` is available like so:
 
 1. `heroku run bash` from your project directory, or `heroku run bash -a <your_app_name>`
 1. `which prince` should report `/app/bin/prince`
-1. `prince --version` should report `15.3`
+1. `prince --version` should report `20240222`
 1. `prince -h` should display usage information
 
 If invoking `prince` fails, you may have unmet dependencies. See the next section for setting those up.
@@ -36,7 +36,7 @@ $ ls tmp/test.pdf
 
 ## Dependencies
 
-PrinceXML depends on some shared libraries which may not ship with your Heroku stack. For example, PrinceXML 15.3 on the Heroku-22 stack needs `libgif-dev` and `libavif-dev`.
+PrinceXML depends on some shared libraries which may not ship with your Heroku stack. For example, PrinceXML `20240222` on the Heroku-22 stack needs `libgif-dev` and `libavif-dev`.
 
 We recommend using [heroku-buildpack-apt](https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-apt), adding these dependencies to an `Aptfile` in your application. Be sure to include the `heroku-buildpack-apt` buildpack prior to `heroku-buildpack-princexml`.
 
